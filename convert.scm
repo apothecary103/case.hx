@@ -1,5 +1,13 @@
 ;;; String to string case conversion. No editor dependencies.
 
+(provide camel-case
+         pascal-case
+         snake-case
+         kebab-case
+         constant-case
+         title-case
+         sentence-case)
+
 ;; Digits, punctuation and uncased scripts answer #false to both.
 (define (upper? c)
   (not (char=? c (char-downcase c))))
@@ -29,3 +37,44 @@
 (define (capitalize w)
   (string-append (string (char-upcase (string-ref w 0)))
                  (string-downcase (substring w 1 (string-length w)))))
+
+;; Peel off leading whitespace, returning (reversed-whitespace . rest).
+(define (span-whitespace cs)
+  (let loop ([cs cs] [acc '()])
+    (if (and (pair? cs) (char-whitespace? (car cs)))
+        (loop (cdr cs) (cons (car cs) acc))
+        (cons acc cs))))
+
+;; Convert each line while preserving its indentation and trailing whitespace.
+(define (per-line join)
+  (define (convert-line line)
+    (define lead (span-whitespace (string->list line)))
+    ;; Reversed, the trailing padding is a leading one.
+    (define tail (span-whitespace (reverse (cdr lead))))
+    (string-append (list->string (reverse (car lead)))
+                   (join (words (reverse (cdr tail))))
+                   (list->string (car tail))))
+  (lambda (s) (string-join (map convert-line (split-many s "\n")) "\n")))
+
+(define (delimited sep fold)
+  (lambda (ws) (string-join (map fold ws) sep)))
+
+(define snake-case (per-line (delimited "_" string-downcase)))
+(define kebab-case (per-line (delimited "-" string-downcase)))
+(define constant-case (per-line (delimited "_" string-upcase)))
+(define title-case (per-line (delimited " " capitalize)))
+(define pascal-case (per-line (lambda (ws) (apply string-append (map capitalize ws)))))
+
+(define camel-case
+  (per-line (lambda (ws)
+              (if (null? ws)
+                  ""
+                  (apply string-append
+                         (cons (string-downcase (car ws)) (map capitalize (cdr ws))))))))
+
+(define sentence-case
+  (per-line (lambda (ws)
+              (if (null? ws)
+                  ""
+                  (string-join (cons (capitalize (car ws)) (map string-downcase (cdr ws)))
+                               " ")))))
