@@ -4,6 +4,8 @@ A [Helix](https://github.com/helix-editor/helix) plugin for changing keyword
 case, written for the [Steel](https://github.com/mattwparas/steel) plugin
 system.
 
+![Demo of case switching in Helix](demo.gif)
+
 ## Install
 
 Clone it anywhere and require it from `~/.config/helix/init.scm`:
