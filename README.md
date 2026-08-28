@@ -8,10 +8,17 @@ system.
 
 ## Install
 
-Clone it anywhere and require it from `~/.config/helix/init.scm`:
+Install with [forge](https://github.com/mattwparas/steel), the Steel package
+manager:
+
+```sh
+forge pkg install --git https://github.com/apothecary103/case.hx
+```
+
+Then require it from `~/.config/helix/init.scm` and bind the commands:
 
 ```scheme
-(require "/path/to/case.hx/case.scm")
+(require "case.hx/case.scm")
 (require (only-in "helix/keymaps.scm" add-global-keybinding))
 
 ;; ` enters case mode. l, u and a are helix builtins, the rest come from case.scm.
@@ -61,6 +68,12 @@ trailing padding alone, so a multi-line selection keeps its shape.
 
 All selections are converted at once, cursors end up on the rewritten text, and
 the whole thing is a single undo step.
+
+## Development
+
+The flake here is for hacking on the plugin, not for installing it. `nix
+develop` gives you a shell with `steel` on `PATH`, and `nix flake check` runs
+the test suite. Without Nix, `steel test.scm` does the same.
 
 ## Acknowledgements
 
